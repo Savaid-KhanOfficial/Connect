@@ -1,0 +1,17 @@
+{
+  "name": "connect-chat",
+  "version": "1.0.0",
+  "description": "Connect - Real-time encrypted chat application",
+  "main": "index.js",
+  "scripts": {
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "keywords": ["chat", "real-time", "socket.io"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
