@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: connect-server
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    volumes:
+      - ./server/uploads:/app/uploads
+      - ./server/logs:/app/logs
+      - server-data:/app/data
+    networks:
+      - connect-network
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: connect-client
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    networks:
+      - connect-network
+
+volumes:
+  server-data:
+
+networks:
+  connect-network:
+    driver: bridge
