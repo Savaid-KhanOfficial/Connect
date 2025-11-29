@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { initializeEncryption } from '../utils/crypto';
+import { getApiUrl } from '../config/api';
 
 function Signup() {
   const [formData, setFormData] = useState({
@@ -33,7 +34,7 @@ function Signup() {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/signup', {
+      const response = await fetch(getApiUrl('api/auth/signup'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -53,7 +54,7 @@ function Signup() {
       const { publicKey } = initializeEncryption();
 
       // Send public key to server
-      await fetch('http://localhost:3000/api/auth/public-key', {
+      await fetch(getApiUrl('api/auth/public-key'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

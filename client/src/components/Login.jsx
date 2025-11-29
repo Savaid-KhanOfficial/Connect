@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { initializeEncryption } from '../utils/crypto';
+import { getApiUrl } from '../config/api';
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -25,7 +26,7 @@ function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch(getApiUrl('api/auth/login'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -46,7 +47,7 @@ function Login() {
 
       // Send public key to server if it's not already saved
       if (!data.public_key || data.public_key !== publicKey) {
-        await fetch('http://localhost:3000/api/auth/public-key', {
+        await fetch(getApiUrl('api/auth/public-key'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
