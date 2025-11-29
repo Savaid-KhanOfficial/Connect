@@ -1,16 +1,13 @@
 import { useState, useContext } from 'react';
 import { Search, UserPlus, X, MessageCircle } from 'lucide-react';
 import { ToastContext } from '../App';
+import { getApiUrl, getAssetUrl } from '../config/api';
 
 function PeopleView({ user, onSelectFriend }) {
   const toast = useContext(ToastContext);
   
-  // Helper to handle both Base64 and legacy file paths
-  const getAvatarUrl = (avatarUrl) => {
-    if (!avatarUrl) return null;
-    if (avatarUrl.startsWith('data:')) return avatarUrl;
-    return `http://localhost:3000${avatarUrl}`;
-  };
+  // Use imported getAssetUrl helper
+  const getAvatarUrl = getAssetUrl;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -29,7 +26,7 @@ function PeopleView({ user, onSelectFriend }) {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/friends/search?query=${encodeURIComponent(searchQuery)}&userId=${user.id}`
+        getApiUrl(`api/friends/search?query=${encodeURIComponent(searchQuery)}&userId=${user.id}`)
       );
       const data = await response.json();
 
@@ -62,7 +59,7 @@ function PeopleView({ user, onSelectFriend }) {
     if (!selectedUser) return;
 
     try {
-      const response = await fetch('http://localhost:3000/api/friends/request', {
+      const response = await fetch(getApiUrl('api/friends/request'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -5,16 +5,13 @@ import { ToastContext } from '../App';
 import { deriveSharedSecret, encryptMessage, decryptMessage } from '../utils/crypto';
 import ConfirmDialog from './ConfirmDialog';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
+import { getApiUrl, getAssetUrl } from '../config/api';
 
 function ChatWindow({ friend, user, socket, onBack }) {
   const toast = useContext(ToastContext);
   
-  // Helper to handle both Base64 and legacy file paths
-  const getAvatarUrl = (avatarUrl) => {
-    if (!avatarUrl) return null;
-    if (avatarUrl.startsWith('data:')) return avatarUrl;
-    return `http://localhost:3000${avatarUrl}`;
-  };
+  // Use imported getAssetUrl helper
+  const getAvatarUrl = getAssetUrl;
 
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
@@ -163,7 +160,7 @@ function ChatWindow({ friend, user, socket, onBack }) {
 
   const fetchMessages = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api/messages/${user.id}/${friend.id}`);
+      const response = await fetch(getApiUrl(`api/messages/${user.id}/${friend.id}`));
       const data = await response.json();
       
       // Decrypt messages if we have a shared secret
@@ -220,7 +217,7 @@ function ChatWindow({ friend, user, socket, onBack }) {
 
   const fetchFriendStatus = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api/messages/user-status/${friend.id}`);
+      const response = await fetch(getApiUrl(`api/messages/user-status/${friend.id}`));
       const data = await response.json();
       setFriendStatus({
         isOnline: data.is_online === 1,
@@ -233,7 +230,7 @@ function ChatWindow({ friend, user, socket, onBack }) {
 
   const fetchBlockStatus = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api/friends/block-status/${user.id}/${friend.id}`);
+      const response = await fetch(getApiUrl(`api/friends/block-status/${user.id}/${friend.id}`));
       const data = await response.json();
       setBlockStatus(data);
     } catch (error) {
@@ -487,7 +484,7 @@ function ChatWindow({ friend, user, socket, onBack }) {
     console.log('User ID:', user.id);
 
     try {
-      const response = await fetch(`http://localhost:3000/api/messages/edit/${messageId}`, {
+      const response = await fetch(getApiUrl(`api/messages/edit/${messageId}`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -523,7 +520,7 @@ function ChatWindow({ friend, user, socket, onBack }) {
       variant: 'danger',
       onConfirm: async () => {
         try {
-          const response = await fetch('http://localhost:3000/api/friends/block', {
+          const response = await fetch(getApiUrl('api/friends/block'), {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -551,7 +548,7 @@ function ChatWindow({ friend, user, socket, onBack }) {
 
   const handleUnblockUser = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/friends/unblock', {
+      const response = await fetch(getApiUrl('api/friends/unblock'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -578,7 +575,7 @@ function ChatWindow({ friend, user, socket, onBack }) {
     if (!deletingMessageId) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/messages/delete/${deletingMessageId}`, {
+      const response = await fetch(getApiUrl(`api/messages/delete/${deletingMessageId}`), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -623,7 +620,7 @@ function ChatWindow({ friend, user, socket, onBack }) {
       variant: 'warning',
       onConfirm: async () => {
         try {
-          const response = await fetch(`http://localhost:3000/api/messages/clear/${friend.id}`, {
+          const response = await fetch(getApiUrl(`api/messages/clear/${friend.id}`), {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -725,7 +722,7 @@ function ChatWindow({ friend, user, socket, onBack }) {
         xhr.onerror = () => reject(new Error('Network error during upload'));
       });
 
-      xhr.open('POST', 'http://localhost:3000/api/upload');
+      xhr.open('POST', getApiUrl('api/upload'));
       xhr.send(formData);
 
       const { url, type, filename, size } = await uploadPromise;
@@ -878,7 +875,7 @@ function ChatWindow({ friend, user, socket, onBack }) {
         xhr.onerror = () => reject(new Error('Network error during upload'));
       });
 
-      xhr.open('POST', 'http://localhost:3000/api/upload');
+      xhr.open('POST', getApiUrl('api/upload'));
       xhr.send(formData);
 
       const { url, type } = await uploadPromise;
@@ -1183,7 +1180,7 @@ function ChatWindow({ friend, user, socket, onBack }) {
                                 
                                 // Delete for me directly
                                 try {
-                                  const response = await fetch(`http://localhost:3000/api/messages/delete/${message.id}`, {
+                                  const response = await fetch(getApiUrl(`api/messages/delete/${message.id}`), {
                                     method: 'POST',
                                     headers: {
                                       'Content-Type': 'application/json'
@@ -1261,10 +1258,10 @@ function ChatWindow({ friend, user, socket, onBack }) {
                           {message.type === 'image' ? (
                             <div className="relative group">
                               <img
-                                src={message.message.startsWith('http') ? message.message : `http://localhost:3000${message.message}`}
+                                src={getAssetUrl(message.message)}
                                 alt="Image"
                                 className="max-w-full max-h-96 rounded-lg cursor-pointer hover:opacity-90 transition"
-                                onClick={() => setLightboxImage(message.message.startsWith('http') ? message.message : `http://localhost:3000${message.message}`)}
+                                onClick={() => setLightboxImage(getAssetUrl(message.message))}
                                 onError={(e) => {
                                   e.target.style.display = 'none';
                                   e.target.parentElement.innerHTML = '<p class="text-red-500 text-sm">❌ Image failed to load</p>';
@@ -1276,7 +1273,7 @@ function ChatWindow({ friend, user, socket, onBack }) {
                               <Mic size={18} className={isMyMessage ? 'text-white' : 'text-cyan-600'} />
                               <audio
                                 controls
-                                src={`http://localhost:3000${message.message}`}
+                                src={getAssetUrl(message.message)}
                                 className={`h-10 ${
                                   isMyMessage 
                                     ? 'audio-player-teal' 
@@ -1291,7 +1288,7 @@ function ChatWindow({ friend, user, socket, onBack }) {
                                 const fileData = JSON.parse(message.message);
                                 return (
                                   <a
-                                    href={`http://localhost:3000${fileData.url}`}
+                                    href={getAssetUrl(fileData.url)}
                                     download={fileData.filename}
                                     className={`flex items-center gap-3 p-3 rounded-lg border ${
                                       isMyMessage 
@@ -1328,7 +1325,7 @@ function ChatWindow({ friend, user, socket, onBack }) {
                                 // Fallback for legacy file format
                                 return (
                                   <a
-                                    href={`http://localhost:3000${message.message}`}
+                                    href={getAssetUrl(message.message)}
                                     download
                                     className={`flex items-center gap-2 ${isMyMessage ? 'text-white hover:text-cyan-200' : 'text-cyan-600 hover:text-cyan-800'} transition`}
                                   >

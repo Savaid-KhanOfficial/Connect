@@ -3,18 +3,15 @@ import { ArrowLeft, Camera, Trash2, Monitor } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ToastContext } from '../App';
 import ConfirmDialog from './ConfirmDialog';
+import { getApiUrl, getAssetUrl } from '../config/api';
 
 function Settings({ user, onUpdateUser }) {
   const navigate = useNavigate();
   const toast = useContext(ToastContext);
   const fileInputRef = useRef(null);
 
-  // Helper to handle both Base64 and legacy file paths
-  const getAvatarUrl = (avatarUrl) => {
-    if (!avatarUrl) return null;
-    if (avatarUrl.startsWith('data:')) return avatarUrl;
-    return `http://localhost:3000${avatarUrl}`;
-  };
+  // Use imported getAssetUrl helper
+  const getAvatarUrl = getAssetUrl;
   
   // Handle case where user is not loaded yet
   if (!user) {
@@ -47,7 +44,7 @@ function Settings({ user, onUpdateUser }) {
 
   const fetchSessions = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api/users/sessions/${user.id}`);
+      const response = await fetch(getApiUrl(`api/users/sessions/${user.id}`));
       if (response.ok) {
         const data = await response.json();
         setSessions(data);
@@ -84,7 +81,7 @@ function Settings({ user, onUpdateUser }) {
       formData.append('avatar', file);
       formData.append('userId', user.id);
 
-      const response = await fetch('http://localhost:3000/api/users/avatar', {
+      const response = await fetch(getApiUrl('api/users/avatar'), {
         method: 'PUT',
         body: formData
       });
@@ -125,7 +122,7 @@ function Settings({ user, onUpdateUser }) {
         try {
           setUploading(true);
 
-          const response = await fetch('http://localhost:3000/api/users/profile', {
+          const response = await fetch(getApiUrl('api/users/profile'), {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json'
@@ -165,7 +162,7 @@ function Settings({ user, onUpdateUser }) {
     try {
       setSaving(true);
 
-      const response = await fetch('http://localhost:3000/api/users/profile', {
+      const response = await fetch(getApiUrl('api/users/profile'), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -203,7 +200,7 @@ function Settings({ user, onUpdateUser }) {
       message: 'Are you sure you want to revoke this session? The user will be logged out from that device.',
       onConfirm: async () => {
         try {
-          const response = await fetch(`http://localhost:3000/api/users/sessions/${sessionId}`, {
+          const response = await fetch(getApiUrl(`api/users/sessions/${sessionId}`), {
             method: 'DELETE'
           });
 
@@ -291,7 +288,7 @@ function Settings({ user, onUpdateUser }) {
                   {uploading ? (
                     <div className="animate-pulse">...</div>
                   ) : avatarUrl ? (
-                    <img src={`http://localhost:3000${avatarUrl}`} alt="Avatar" className="w-full h-full object-cover" />
+                    <img src={getAssetUrl(avatarUrl)} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
                     user?.username?.charAt(0).toUpperCase()
                   )}

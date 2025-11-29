@@ -1,16 +1,13 @@
 import { useState, useEffect, useContext } from 'react';
 import { UserPlus, Check, X } from 'lucide-react';
 import { ToastContext } from '../App';
+import { getApiUrl, getAssetUrl } from '../config/api';
 
 function RequestsView({ user, onRequestHandled }) {
   const toast = useContext(ToastContext);
   
-  // Helper to handle both Base64 and legacy file paths
-  const getAvatarUrl = (avatarUrl) => {
-    if (!avatarUrl) return null;
-    if (avatarUrl.startsWith('data:')) return avatarUrl;
-    return `http://localhost:3000${avatarUrl}`;
-  };
+  // Use imported getAssetUrl helper
+  const getAvatarUrl = getAssetUrl;
 
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +19,7 @@ function RequestsView({ user, onRequestHandled }) {
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:3000/api/friends/requests/${user.id}`);
+      const response = await fetch(getApiUrl(`api/friends/requests/${user.id}`));
       const data = await response.json();
       setRequests(data);
     } catch (error) {
@@ -34,7 +31,7 @@ function RequestsView({ user, onRequestHandled }) {
 
   const handleAccept = async (requestId) => {
     try {
-      const response = await fetch('http://localhost:3000/api/friends/accept', {
+      const response = await fetch(getApiUrl('api/friends/accept'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -68,7 +65,7 @@ function RequestsView({ user, onRequestHandled }) {
 
   const handleReject = async (requestId) => {
     try {
-      const response = await fetch('http://localhost:3000/api/friends/reject', {
+      const response = await fetch(getApiUrl('api/friends/reject'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
