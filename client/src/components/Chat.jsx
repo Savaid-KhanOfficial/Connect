@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, MessageCircle, Users, UserPlus, Settings } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { ToastContext } from '../App';
+import { SOCKET_URL, getAssetUrl, getApiUrl } from '../config/api';
 import PeopleView from './PeopleView';
 import RequestsView from './RequestsView';
 import ChatWindow from './ChatWindow';
@@ -16,7 +17,7 @@ function Chat() {
   const getAvatarUrl = (avatarUrl) => {
     if (!avatarUrl) return null;
     if (avatarUrl.startsWith('data:')) return avatarUrl; // Base64 Data URI
-    return `http://localhost:3000${avatarUrl}`; // Legacy file path
+    return getAssetUrl(avatarUrl); // Use API config
   };
   const [activeView, setActiveView] = useState('chats'); // 'chats', 'people', 'requests'
   const [requestCount, setRequestCount] = useState(0);
@@ -32,7 +33,7 @@ function Chat() {
 
   useEffect(() => {
     // Connect to Socket.io with cleanup function (prevents double connections in React StrictMode)
-    const newSocket = io('http://localhost:3000', {
+    const newSocket = io(SOCKET_URL, {
       auth: {
         userId: user.id
       }
@@ -152,7 +153,7 @@ function Chat() {
 
   const fetchRequestCount = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api/friends/requests/${user.id}`);
+      const response = await fetch(getApiUrl(`api/friends/requests/${user.id}`));
       const data = await response.json();
       setRequestCount(data.length);
     } catch (error) {
@@ -162,7 +163,7 @@ function Chat() {
 
   const fetchFriends = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api/friends/list/${user.id}`);
+      const response = await fetch(getApiUrl(`api/friends/list/${user.id}`));
       const data = await response.json();
       
       // Check if data is an array, if not set empty array

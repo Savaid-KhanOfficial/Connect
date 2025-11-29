@@ -46,7 +46,7 @@ if ($LASTEXITCODE -ne 0) {
     Write-Host "  4. EC2 IP address is correct" -ForegroundColor Yellow
     exit 1
 }
-Write-Host "✓ SSH connection successful!" -ForegroundColor Green
+Write-Host "[OK] SSH connection successful!" -ForegroundColor Green
 Write-Host ""
 
 # Create deployment package
@@ -72,7 +72,7 @@ Write-Host "Compressing project files..."
 Compress-Archive -Path ".\*" -DestinationPath $zipFile -Force -CompressionLevel Optimal
 
 $zipSize = [math]::Round((Get-Item $zipFile).Length / 1MB, 2)
-Write-Host "✓ Package created: $zipFile ($zipSize MB)" -ForegroundColor Green
+Write-Host "[OK] Package created: $zipFile ($zipSize MB)" -ForegroundColor Green
 Write-Host ""
 
 # Upload to EC2
@@ -83,13 +83,13 @@ if ($LASTEXITCODE -ne 0) {
     Remove-Item $zipFile -Force
     exit 1
 }
-Write-Host "✓ Upload complete!" -ForegroundColor Green
+Write-Host "[OK] Upload complete!" -ForegroundColor Green
 Write-Host ""
 
 # Upload setup script
 Write-Host "Uploading setup script..." -ForegroundColor Cyan
 scp -i $PEM_FILE -o StrictHostKeyChecking=no ".\setup-ec2.sh" "$EC2_USER@$EC2_IP`:~/setup-ec2.sh"
-Write-Host "✓ Setup script uploaded!" -ForegroundColor Green
+Write-Host "[OK] Setup script uploaded!" -ForegroundColor Green
 Write-Host ""
 
 # Execute setup on EC2
@@ -128,4 +128,4 @@ if ($LASTEXITCODE -eq 0) {
 # Cleanup
 Write-Host "Cleaning up local files..."
 Remove-Item $zipFile -Force
-Write-Host "✓ Cleanup complete!" -ForegroundColor Green
+Write-Host "[OK] Cleanup complete!" -ForegroundColor Green
